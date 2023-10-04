@@ -3,30 +3,39 @@ import requests
 
 app = Flask(__name__)
 
+def get_neighborhood(lat, lon, username):
+    base_url = "http://api.geonames.org/neighbourhoodJSON?"
+    params = {
+        "lat": lat,
+        "lng": lon,
+        "username": username
+    }
+    response = requests.get(base_url, params=params)
+    data = response.json()
+    return data.get('neighbourhood', {}).get('name', "Not available")
+
 @app.route('/get_neighborhood', methods=['GET'])
 def get_neighborhood_from_geonames():
     try:
-        lat = request.args.get('lat')
-        lon = request.args.get('lon')
+        lat = float(request.args.get('lat'))
+        lon = float(request.args.get('lon'))
         username = "matthewjmiller07"  # Your GeoNames username
         
-        base_url = "http://api.geonames.org/neighbourhoodJSON?"
-        params = {
-            "lat": lat,
-            "lng": lon,
-            "username": username
-        }
+        # Try original coordinates first
+        neighborhood = get_neighborhood(lat, lon, username)
+        if neighborhood != "Not available":
+            return jsonify({"neighborhood": neighborhood})
         
-        response = requests.get(base_url, params=params)
-        response.raise_for_status()  # Raise HTTPError for bad responses
+        # Buffer zone approach
+        delta = 0.001  # Adjust as needed
+        for dlat in [0, delta, -delta]:
+            for dlon in [0, delta, -delta]:
+                neighborhood = get_neighborhood(lat + dlat, lon + dlon, username)
+                if neighborhood != "Not available":
+                    return jsonify({"neighborhood": neighborhood})
         
-        data = response.json()  # Parse JSON
+        return jsonify({"neighborhood": "Not available"})
         
-        if 'neighbourhood' in data:
-            neighborhood_info = data['neighbourhood']
-            return jsonify({"neighborhood": neighborhood_info.get('name', "Not available")})
-        else:
-            return jsonify({"neighborhood": "Not available"})
     except requests.RequestException as e:
         return jsonify({"Error": str(e)})
 
