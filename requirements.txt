@@ -1,0 +1,2 @@
+Flask==2.1.0  # You can specify the version you're using
+requests==2.26.0  # You can specify the version you're using
