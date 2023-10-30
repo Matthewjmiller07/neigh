@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify
 import requests
-import wikipediaapi
+# import wikipediaapi
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
-wiki_wiki = wikipediaapi.Wikipedia(language='en', user_agent='my_application')
+# wiki_wiki = wikipediaapi.Wikipedia(language='en', user_agent='my_application')
 
 app = Flask(__name__)
 
@@ -19,7 +19,7 @@ def get_neighborhood_from_geonames():
         logging.info(f"Received request for lat: {lat}, lon: {lon}")
 
         # Initialize Wikipedia API
-        wiki_wiki = wikipediaapi.Wikipedia(language='en', user_agent='my_application')
+        # wiki_wiki = wikipediaapi.Wikipedia(language='en', user_agent='my_application')
 
         # First API call for neighbourhood information
         base_url = "http://api.geonames.org/neighbourhoodJSON?"
@@ -58,19 +58,19 @@ def get_neighborhood_from_geonames():
             if 'geonames' in fallback_data and len(fallback_data['geonames']) > 0:
                 search_term = fallback_data['geonames'][0].get('name', "Not available")
 
-        wikipedia_info = None
+        # wikipedia_info = None
 
-        logging.info(f"Searching Wikipedia for: {search_term}")
+        # logging.info(f"Searching Wikipedia for: {search_term}")
 
-        if search_term:
-            page = wiki_wiki.page(search_term)
-            if page.exists():
-                wikipedia_info = page.summary[:1000]
-                logging.info(f"Wikipedia page found: {wikipedia_info[:100]}")
-            else:
-                logging.info("Wikipedia page does not exist.")
+        # if search_term:
+        #     page = wiki_wiki.page(search_term)
+        #     if page.exists():
+        #         wikipedia_info = page.summary[:1000]
+        #         logging.info(f"Wikipedia page found: {wikipedia_info[:100]}")
+        #     else:
+        #         logging.info("Wikipedia page does not exist.")
 
-        return jsonify({"neighborhood": search_term, "wikipedia_info": wikipedia_info})
+        return jsonify({"neighborhood": search_term})  # , "wikipedia_info": wikipedia_info})
 
     except requests.RequestException as e:
         logging.error(f"Request error: {e}")
